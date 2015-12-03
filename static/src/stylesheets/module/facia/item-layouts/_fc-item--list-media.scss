@@ -75,7 +75,8 @@ Media list item. Looks a bit like this:
     }
 
     .fc-item__media-wrapper,
-    .fc-item__image-container {
+    .fc-item__image-container,
+    .fc-item__video-fallback {
         display: block;
     }
 
