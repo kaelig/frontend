@@ -296,6 +296,10 @@ define([
                 resizeTimeout: 2000
             });
 
+            var topSlotId = 'dfp-ad--top-above-nav';
+
+            var responseCameBack = false;
+
             resizeTimeout = opts.resizeTimeout;
 
             // if we don't already have googletag, create command queue and load it async
@@ -305,25 +309,81 @@ define([
                 require(['js!googletag.js']);
             }
 
+            // do the same for prebid.js
+            if (!window.pbjs) {
+                window.pbjs = { que: [] };
+                require(['js!prebid.js']);
+            }
+
             window.googletag.cmd.push = raven.wrap({ deep: true }, window.googletag.cmd.push);
 
             window.googletag.cmd.push(function () {
-                renderStartTime = new Date().getTime();
+                console.log('Define slot');
+                //setPublisherProvidedId();
+                window.googletag.pubads().enableSingleRequest();
+                window.googletag.enableServices();
+
+                defineSlot(bonzo(document.getElementById(topSlotId)));
             });
-            window.googletag.cmd.push(setListeners);
-            window.googletag.cmd.push(setPageTargeting);
-            window.googletag.cmd.push(defineSlots);
 
-            if (shouldLazyLoad()) {
-                window.googletag.cmd.push(displayLazyAds);
-            } else {
-                window.googletag.cmd.push(displayAds);
+            pbjs.que.push(function registerTopSlot() {
+                var topSlot = {
+                    code: '/59666047/theguardian.com/uk/front/ng',
+                    sizes : [900, 250],
+                    bids : [{
+                        bidder : 'appnexus',
+                        params : {
+                            placementId : 4298047,
+                            referrer : 'http://www.theguardian.com/uk'
+                        }
+                    }]
+                };
+                pbjs.addAdUnits([topSlot]);
+            });
+
+            pbjs.que.push(function requestWhenReady() {
+                pbjs.requestBids({
+                    bidsBackHandler : function (responses) {
+                        responseCameBack = true;
+                        console.log('Bids came back', JSON.stringify(responses));
+                        window.googletag.cmd.push(function () {
+                            pbjs.setTargetingForGPTAsync();
+                            displayTopSlot('From auction');
+                        });
+                    }
+                });
+                window.setTimeout(function () {
+                    if (!responseCameBack) {
+                        displayTopSlot('From default');
+                        console.log('Ad call timed out');
+                    }
+                }, 6000)
+            });
+
+            function displayTopSlot(path) {
+                window.googletag.cmd.push(function () {
+                    console.log('Displaying advert from path', path);
+                    window.googletag.display(topSlotId);
+                })
             }
-            // anything we want to happen after displaying ads
-            window.googletag.cmd.push(postDisplay);
 
-            // show sponsorship placeholder if adblock detected
-            showSponsorshipPlaceholder();
+            //window.googletag.cmd.push(function () {
+            //    renderStartTime = new Date().getTime();
+            //});
+            //window.googletag.cmd.push(setListeners);
+            //window.googletag.cmd.push(setPageTargeting);
+            //window.googletag.cmd.push(defineSlots);
+
+            //if (shouldLazyLoad()) {
+            //    window.googletag.cmd.push(displayLazyAds);
+            //} else {
+            //    window.googletag.cmd.push(displayAds);
+            //}
+            //// anything we want to happen after displaying ads
+            //window.googletag.cmd.push(postDisplay);
+            //
+            //// show sponsorship placeholder if adblock detected
+            //showSponsorshipPlaceholder();
         },
 
         /**

@@ -24,6 +24,7 @@ var curl = {
             lodash:                         'components/lodash-amd',
             picturefill:                    'projects/common/utils/picturefill',
             Promise:                        'components/when/Promise',
+            'prebid.js':                    'vendor/prebid/20151125/prebid.js',
             qwery:                          'components/qwery/qwery',
             raven:                          'components/raven-js/raven',
             reqwest:                        'components/reqwest/reqwest',
