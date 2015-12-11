@@ -341,20 +341,36 @@ define([
             pbjs.que.push(function () {
                 var adUnits = [{
                     code : 'dfp-ad--top-above-nav',
-                    sizes : [[900, 250]],
-                    bids : [{
-                        bidder : 'appnexus',
-                        params : {placementId: 4298047, referrer: 'http://www.theguardian.com/uk'}
-                    }]
+                    sizes : [[728, 90], [900, 250], [970, 250]],
+                    bids : [
+                        {
+                            // 728x90 call
+                            bidder : 'appnexus',
+                            params : {placementId: 4298172, referrer: 'http://www.theguardian.com/uk'}
+                        }, {
+                            // 900x250 call
+                            bidder : 'appnexus',
+                            params : {placementId: 4298047, referrer: 'http://www.theguardian.com/uk'}
+                        }, {
+                            // 970x250 call
+                            bidder : 'appnexus',
+                            params : {placementId: 4298654, referrer: 'http://www.theguardian.com/uk'}
+                        }
+                    ]
                 }];
+
                 pbjs.addAdUnits(adUnits);
+
                 logTiming('Bid request');
+
                 pbjs.requestBids({
                     bidsBackHandler : function (bidResponses) {
                         logTiming('Bid response');
                         console.log('Responses', JSON.stringify(bidResponses));
+
                         googletag.cmd.push(function () {
                             logTiming('Bid display');
+
                             pbjs.setTargetingForGPTAsync();
                             googletag.display('dfp-ad--top-above-nav');
                         });
