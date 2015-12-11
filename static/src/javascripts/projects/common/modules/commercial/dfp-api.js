@@ -298,7 +298,9 @@ define([
             googletag.cmd = googletag.cmd || [];
 
             function initAdserver() {
-                if (pbjs && pbjs.initAdserverSet) return;
+                if (pbjs && pbjs.initAdserverSet) {
+                    return;
+                }
                 require(['js!googletag.js']);
                 pbjs.initAdserverSet = true;
             }
@@ -320,7 +322,7 @@ define([
                     }];
                     pbjs.addAdUnits(adUnits);
                     pbjs.requestBids({
-                        bidsBackHandler : function(bidResponses) {
+                        bidsBackHandler : function (bidResponses) {
                             console.log('Responses', JSON.stringify(bidResponses));
                             initAdserver();
                         }
@@ -335,7 +337,7 @@ define([
                     'dfp-ad--top-above-nav'
                 ).addService(googletag.pubads());
 
-                pbjs.que.push(function() {
+                pbjs.que.push(function () {
                     pbjs.setTargetingForGPTAsync();
                 });
                 googletag.pubads().enableSingleRequest();
