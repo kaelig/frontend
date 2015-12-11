@@ -88,6 +88,10 @@ define([
     last,
     intersection,
     initial) {
+
+    /*eslint-disable*/
+    /*disable eslint for purposes of prebid experiment*/
+
     /**
      * Right, so an explanation as to how this works...
      *
