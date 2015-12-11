@@ -292,98 +292,59 @@ define([
             mediator.on('window:resize', windowResize);
         },
         setupAdvertising = function (options) {
-            var opts = defaults(options || {}, {
-                resizeTimeout: 2000
-            });
+            var PREBID_TIMEOUT = 8000;
 
-            var topSlotId = 'dfp-ad--top-above-nav';
+            window.googletag = window.googletag || {};
+            googletag.cmd = googletag.cmd || [];
 
-            var responseCameBack = false;
-
-            resizeTimeout = opts.resizeTimeout;
-
-            // if we don't already have googletag, create command queue and load it async
-            if (!window.googletag) {
-                window.googletag = { cmd: [] };
-                // load the library asynchronously
+            function initAdserver() {
+                if (pbjs && pbjs.initAdserverSet) return;
                 require(['js!googletag.js']);
+                pbjs.initAdserverSet = true;
             }
 
-            // do the same for prebid.js
-            if (!window.pbjs) {
-                window.pbjs = { que: [] };
-                require(['js!prebid.js']);
-            }
+            setTimeout(initAdserver, PREBID_TIMEOUT);
 
-            window.googletag.cmd.push = raven.wrap({ deep: true }, window.googletag.cmd.push);
+            window.pbjs = window.pbjs || {};
+            pbjs.que = pbjs.que || [];
 
-            window.googletag.cmd.push(function () {
-                console.log('Define slot');
-                //setPublisherProvidedId();
-                window.googletag.pubads().enableSingleRequest();
-                window.googletag.enableServices();
-
-                defineSlot(bonzo(document.getElementById(topSlotId)));
-            });
-
-            pbjs.que.push(function registerTopSlot() {
-                var topSlot = {
-                    code: '/59666047/theguardian.com/uk/front/ng',
-                    sizes : [900, 250],
-                    bids : [{
-                        bidder : 'appnexus',
-                        params : {
-                            placementId : 4298047,
-                            referrer : 'http://www.theguardian.com/uk'
+            require(['js!prebid.js'], function () {
+                pbjs.que.push(function () {
+                    var adUnits = [{
+                        code : 'dfp-ad--top-above-nav',
+                        sizes : [[900, 250]],
+                        bids : [{
+                            bidder : 'appnexus',
+                            params : {placementId: 4298047, referrer: 'http://www.theguardian.com/uk'}
+                        }]
+                    }];
+                    pbjs.addAdUnits(adUnits);
+                    pbjs.requestBids({
+                        bidsBackHandler : function(bidResponses) {
+                            console.log('Responses', JSON.stringify(bidResponses));
+                            initAdserver();
                         }
-                    }]
-                };
-                pbjs.addAdUnits([topSlot]);
-            });
-
-            pbjs.que.push(function requestWhenReady() {
-                pbjs.requestBids({
-                    bidsBackHandler : function (responses) {
-                        responseCameBack = true;
-                        console.log('Bids came back', JSON.stringify(responses));
-                        window.googletag.cmd.push(function () {
-                            pbjs.setTargetingForGPTAsync();
-                            displayTopSlot('From auction');
-                        });
-                    }
+                    });
                 });
-                window.setTimeout(function () {
-                    if (!responseCameBack) {
-                        displayTopSlot('From default');
-                        console.log('Ad call timed out');
-                    }
-                }, 6000)
             });
 
-            function displayTopSlot(path) {
-                window.googletag.cmd.push(function () {
-                    console.log('Displaying advert from path', path);
-                    window.googletag.display(topSlotId);
-                })
-            }
+            googletag.cmd.push(function () {
+                googletag.defineSlot(
+                    '/59666047/theguardian.com/uk/front/ng',
+                    [[900, 250]],
+                    'dfp-ad--top-above-nav'
+                ).addService(googletag.pubads());
 
-            //window.googletag.cmd.push(function () {
-            //    renderStartTime = new Date().getTime();
-            //});
-            //window.googletag.cmd.push(setListeners);
-            //window.googletag.cmd.push(setPageTargeting);
-            //window.googletag.cmd.push(defineSlots);
+                pbjs.que.push(function() {
+                    pbjs.setTargetingForGPTAsync();
+                });
+                googletag.pubads().enableSingleRequest();
+                googletag.enableServices();
+            });
 
-            //if (shouldLazyLoad()) {
-            //    window.googletag.cmd.push(displayLazyAds);
-            //} else {
-            //    window.googletag.cmd.push(displayAds);
-            //}
-            //// anything we want to happen after displaying ads
-            //window.googletag.cmd.push(postDisplay);
-            //
-            //// show sponsorship placeholder if adblock detected
-            //showSponsorshipPlaceholder();
+            googletag.cmd.push(function () {
+                googletag.display('dfp-ad--top-above-nav');
+            });
         },
 
         /**
