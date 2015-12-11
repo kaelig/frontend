@@ -313,61 +313,57 @@ define([
             mediator.on('window:resize', windowResize);
         },
         setupAdvertising = function (options) {
-            var PREBID_TIMEOUT = 8000;
+            // This is just a big messy hack
 
-            window.googletag = window.googletag || {};
-            googletag.cmd = googletag.cmd || [];
+            //var PREBID_TIMEOUT = 8000;
 
-            function initAdserver() {
-                if (pbjs && pbjs.initAdserverSet) {
-                    return;
-                }
-                require(['js!googletag.js']);
-                pbjs.initAdserverSet = true;
+            if (!window.googletag) {
+                window.googletag = { cmd : [] };
+                require(['js!googletag.js'], logTiming.bind(window, 'GPT loaded'));
             }
 
-            setTimeout(initAdserver, PREBID_TIMEOUT);
-
-            window.pbjs = window.pbjs || {};
-            pbjs.que = pbjs.que || [];
-
-            require(['js!prebid.js'], function () {
-                pbjs.que.push(function () {
-                    var adUnits = [{
-                        code : 'dfp-ad--top-above-nav',
-                        sizes : [[900, 250]],
-                        bids : [{
-                            bidder : 'appnexus',
-                            params : {placementId: 4298047, referrer: 'http://www.theguardian.com/uk'}
-                        }]
-                    }];
-                    pbjs.addAdUnits(adUnits);
-                    pbjs.requestBids({
-                        bidsBackHandler : function (bidResponses) {
-                            console.log('Responses', JSON.stringify(bidResponses));
-                            initAdserver();
-                        }
-                    });
-                });
-            });
+            if (!window.pbjs || !window.pbjs.que) {
+                window.pbjs = { que : [] };
+                require(['js!prebid.js'], logTiming.bind(window, 'PBJS loaded'));
+            }
 
             googletag.cmd.push(function () {
+                googletag.pubads().enableSingleRequest();
+                googletag.enableServices();
                 googletag.defineSlot(
                     '/59666047/theguardian.com/uk/front/ng',
                     [[900, 250]],
                     'dfp-ad--top-above-nav'
                 ).addService(googletag.pubads());
+                logTiming('GPT setup');
+            });
 
-                pbjs.que.push(function () {
-                    pbjs.setTargetingForGPTAsync();
+            pbjs.que.push(function () {
+                var adUnits = [{
+                    code : 'dfp-ad--top-above-nav',
+                    sizes : [[900, 250]],
+                    bids : [{
+                        bidder : 'appnexus',
+                        params : {placementId: 4298047, referrer: 'http://www.theguardian.com/uk'}
+                    }]
+                }];
+                pbjs.addAdUnits(adUnits);
+                logTiming('Bid request');
+                pbjs.requestBids({
+                    bidsBackHandler : function (bidResponses) {
+                        logTiming('Bid response');
+                        console.log('Responses', JSON.stringify(bidResponses));
+                        googletag.cmd.push(function () {
+                            logTiming('Bid display');
+                            googletag.display('dfp-ad--top-above-nav');
+                        });
+                    }
                 });
-                googletag.pubads().enableSingleRequest();
-                googletag.enableServices();
             });
 
-            googletag.cmd.push(function () {
-                googletag.display('dfp-ad--top-above-nav');
-            });
+            function logTiming(event) {
+                console.log(event, window.performance.now())
+            }
         },
 
         /**
