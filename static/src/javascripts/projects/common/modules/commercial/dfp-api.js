@@ -355,6 +355,7 @@ define([
                         console.log('Responses', JSON.stringify(bidResponses));
                         googletag.cmd.push(function () {
                             logTiming('Bid display');
+                            pbjs.setTargetingForGPTAsync();
                             googletag.display('dfp-ad--top-above-nav');
                         });
                     }
