@@ -510,7 +510,7 @@ define([
         },
         parseAd = function (event) {
             var size,
-                slotId = event.slot.getSlotId().getDomId(),
+                slotId = event.slot.getSlotElementId(),
                 $slot = $('#' + slotId),
                 $placeholder,
                 $adSlotContent;
