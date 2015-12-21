@@ -339,6 +339,46 @@ define([
             });
 
             pbjs.que.push(function () {
+                pbjs.bidderSettings = {
+                    standard : {
+                        alwaysUseBid : false,
+                        // These form the custom key-value pairs sent up to DFP per ad request
+                        adserverTargeting : [{
+                            key : 'hb_pb',
+                            val : function getPriceBucket(bidResponse) {
+                                var buckets = [0.50, 1.00, 1.50];
+                                var lastBucket = buckets[buckets.length - 1];
+
+                                var matchingBucket;
+                                if (bidResponse.cpm > lastBucket) {
+                                    matchingBucket = lastBucket;
+                                } else {
+                                    matchingBucket = getFirstAbove(buckets, bidResponse.cpm);
+                                }
+
+                                return toPriceString(matchingBucket);
+
+                                function getFirstAbove(array, threshold) {
+                                    for (var i = 0; i < array.length; i++) {
+                                        if (array[i] > threshold) {
+                                            return array[i];
+                                        }
+                                    }
+                                }
+
+                                function toPriceString(bucketValue) {
+                                    return bucketValue.toFixed(2);
+                                }
+                            }
+                        }, {
+                            key : 'hb_adid',
+                            val : function(bidResponse) {
+                                return bidResponse.adId;
+                            }
+                        }]
+                    }
+                };
+
                 var adUnits = [{
                     code : 'dfp-ad--top-above-nav',
                     sizes : [[728, 90], [900, 250], [970, 250]],
