@@ -345,7 +345,7 @@ define([
                         // These form the custom key-value pairs sent up to DFP per ad request
                         adserverTargeting : [{
                             key : 'hb_pb',
-                            val : function getPriceBucket(bidResponse) {
+                            val : function getPriceBucket (bidResponse) {
                                 var buckets = [0.50, 1.00, 1.50];
                                 var lastBucket = buckets[buckets.length - 1];
 
@@ -372,7 +372,7 @@ define([
                             }
                         }, {
                             key : 'hb_adid',
-                            val : function(bidResponse) {
+                            val : function (bidResponse) {
                                 return bidResponse.adId;
                             }
                         }]
