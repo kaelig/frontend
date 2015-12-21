@@ -345,15 +345,15 @@ define([
                         // These form the custom key-value pairs sent up to DFP per ad request
                         adserverTargeting : [{
                             key : 'hb_pb',
-                            val : function getPriceBucket (bidResponse) {
+                            val : function getPriceBucket(bidResponse) {
                                 var buckets = [0.50, 1.00, 1.50];
                                 var lastBucket = buckets[buckets.length - 1];
 
                                 var matchingBucket;
-                                if (bidResponse.cpm > lastBucket) {
-                                    matchingBucket = lastBucket;
+                                if (bidResponse.cpm < lastBucket) {
+                                    matchingBucket = getFirstAbove(buckets, bidResponse.cpm)
                                 } else {
-                                    matchingBucket = getFirstAbove(buckets, bidResponse.cpm);
+                                    matchingBucket = lastBucket;
                                 }
 
                                 return toPriceString(matchingBucket);
