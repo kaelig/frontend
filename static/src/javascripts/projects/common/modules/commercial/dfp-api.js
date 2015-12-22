@@ -319,6 +319,7 @@ define([
 
             //var PREBID_TIMEOUT = 8000;
 
+            // Start loading the GPT and PBJS libraries
             if (!window.googletag) {
                 window.googletag = { cmd : [] };
                 require(['js!googletag.js'], logTiming.bind(window, 'GPT loaded'));
@@ -331,6 +332,7 @@ define([
 
             var topSlot;
 
+            // Register the top slot
             googletag.cmd.push(function () {
                 googletag.pubads().enableSingleRequest();
                 googletag.enableServices();
@@ -343,6 +345,7 @@ define([
                 logTiming('GPT setup');
             });
 
+            // Set up PBJS and dispatch an auction for the top slot
             pbjs.que.push(function () {
                 pbjs.bidderSettings = {
                     standard : {
