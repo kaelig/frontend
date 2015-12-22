@@ -342,9 +342,10 @@ define([
                 );
                 topSlot.addService(googletag.pubads());
 
-                // We don't want a single-request architecture if lazy-loading
+                // Disable this if lazy loading
+                // Sets single-request architecture
                 // Must be set after services have been added, but before they are enabled
-                googletag.pubads().enableSingleRequest();
+                //googletag.pubads().enableSingleRequest();
 
                 // Enable all services that have been defined for ad slots on the page
                 googletag.enableServices();
@@ -442,6 +443,54 @@ define([
                         console.log('Responses', JSON.stringify(bidResponses));
                     }
                 });
+            };
+
+            window.addAnotherTopSlot = function () {
+                var newDiv = createAdSlot('another-slot', 'another-slot');
+                var $newDiv = $.create(newDiv);
+                $('body').prepend($newDiv);
+
+                var newSlot = googletag.defineSlot(
+                    '/59666047/theguardian.com/uk/front/ng',
+                    [[900, 250]],
+                    'dfp-ad--another-slot'
+                );
+                newSlot.addService(googletag.pubads());
+
+                pbjs.addAdUnits([{
+                    code : 'dfp-ad--another-slot',
+                    sizes : [[728, 90], [900, 250], [970, 250]],
+                    bids : [
+                        {
+                            // 728x90 call
+                            bidder : 'appnexus',
+                            params : {placementId: 4298172, referrer: 'http://www.theguardian.com/uk'}
+                        }, {
+                            // 900x250 call
+                            bidder : 'appnexus',
+                            params : {placementId: 4298047, referrer: 'http://www.theguardian.com/uk'}
+                        }, {
+                            // 970x250 call
+                            bidder : 'appnexus',
+                            params : {placementId: 4298654, referrer: 'http://www.theguardian.com/uk'}
+                        }
+                    ]
+                }]);
+
+                pbjs.requestBids({
+                    bidsBackHandler : function (bidResponses) {
+                        logTiming('New slot`s bid response');
+                        console.log('Responses', JSON.stringify(bidResponses));
+
+                        googletag.cmd.push(function () {
+                            logTiming('Bid display');
+
+                            pbjs.setTargetingForGPTAsync('dfp-ad--another-slot');
+                            googletag.display('dfp-ad--another-slot');
+                        });
+                    }
+                });
+
             };
 
             function logTiming(event) {
