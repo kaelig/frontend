@@ -334,14 +334,21 @@ define([
 
             // Register the top slot
             googletag.cmd.push(function () {
-                googletag.pubads().enableSingleRequest();
-                googletag.enableServices();
+                // Create a slot and add the pubads service
                 topSlot = googletag.defineSlot(
                     '/59666047/theguardian.com/uk/front/ng',
                     [[900, 250]],
                     'dfp-ad--top-above-nav'
                 );
                 topSlot.addService(googletag.pubads());
+
+                // We don't want a single-request architecture if lazy-loading
+                // Must be set after services have been added, but before they are enabled
+                googletag.pubads().enableSingleRequest();
+
+                // Enable all services that have been defined for ad slots on the page
+                googletag.enableServices();
+
                 logTiming('GPT setup');
             });
 
