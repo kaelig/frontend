@@ -18,6 +18,7 @@ define([
     'common/utils/sha1',
     'common/utils/fastdom-idle',
     'common/utils/cookies',
+    'common/modules/commercial/create-ad-slot',
     'common/modules/commercial/ads/sticky-mpu',
     'common/modules/commercial/build-page-targeting',
     'common/modules/commercial/commercial-features',
@@ -78,6 +79,7 @@ define([
     sha1,
     idleFastdom,
     cookies,
+    createAdSlot,
     StickyMpu,
     buildPageTargeting,
     commercialFeatures,
@@ -327,14 +329,17 @@ define([
                 require(['js!prebid.js'], logTiming.bind(window, 'PBJS loaded'));
             }
 
+            var topSlot;
+
             googletag.cmd.push(function () {
                 googletag.pubads().enableSingleRequest();
                 googletag.enableServices();
-                googletag.defineSlot(
+                topSlot = googletag.defineSlot(
                     '/59666047/theguardian.com/uk/front/ng',
                     [[900, 250]],
                     'dfp-ad--top-above-nav'
-                ).addService(googletag.pubads());
+                );
+                topSlot.addService(googletag.pubads());
                 logTiming('GPT setup');
             });
 
@@ -417,6 +422,17 @@ define([
                     }
                 });
             });
+
+            window.refreshTopSlot = function () {
+                pbjs.requestBids({
+                    adUnitCodes : ['dfp-ad--top-above-nav'],
+                    bidsBackHandler : function (bidResponses) {
+                        pbjs.setTargetingForGPTAsync('dfp-ad--top-above-nav'); // can accept adUnitPath or slotElementId
+                        googletag.pubads().refresh([topSlot]);
+                        console.log('Responses', JSON.stringify(bidResponses));
+                    }
+                });
+            };
 
             function logTiming(event) {
                 console.log(event, window.performance.now())
