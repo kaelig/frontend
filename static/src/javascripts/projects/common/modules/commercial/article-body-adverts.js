@@ -48,6 +48,9 @@ define([
         return newRules;
     }
 
+    var ads = [];
+    var adNames = [['inline1', 'inline'], ['inline2', 'inline']];
+
     // Add new ads while there is still space
     function addLongArticleAds(count) {
         if (count < 1) {
@@ -79,40 +82,38 @@ define([
         $ad.insertBefore(paras[0]);
     }
 
-    var ads = [],
-        adNames = [['inline1', 'inline'], ['inline2', 'inline']],
-        init = function () {
-            if (!commercialFeatures.articleBodyAdverts) {
-                return false;
-            }
+    var init = function () {
+        if (!commercialFeatures.articleBodyAdverts) {
+            return false;
+        }
 
-            var rules = getRules();
+        var rules = getRules();
 
-            if (config.page.hasInlineMerchandise) {
-                spaceFiller.fillSpace(getInlineMerchRules(), function (paras) {
-                    adNames.unshift(['im', 'im']);
-                    insertAdAtPara(paras);
-                });
-            }
+        if (config.page.hasInlineMerchandise) {
+            spaceFiller.fillSpace(getInlineMerchRules(), function (paras) {
+                adNames.unshift(['im', 'im']);
+                insertAdAtPara(paras);
+            });
+        }
 
-            if (config.switches.viewability && detect.getBreakpoint() !== 'mobile') {
-                return tryAddingAdvert().then(tryAddingAdvert).then(function () {
-                    return addLongArticleAds(8);
-                });
-            } else {
-                return tryAddingAdvert().then(function () {
-                    if (detect.isBreakpoint({max: 'tablet'})) {
-                        return tryAddingAdvert();
-                    } else {
-                        return Promise.resolve(null);
-                    }
-                });
-            }
+        if (config.switches.viewability && detect.getBreakpoint() !== 'mobile') {
+            return tryAddingAdvert().then(tryAddingAdvert).then(function () {
+                return addLongArticleAds(8);
+            });
+        } else {
+            return tryAddingAdvert().then(function () {
+                if (detect.isBreakpoint({max: 'tablet'})) {
+                    return tryAddingAdvert();
+                } else {
+                    return Promise.resolve(null);
+                }
+            });
+        }
 
-            function tryAddingAdvert() {
-                return spaceFiller.fillSpace(rules, insertAdAtPara);
-            }
-        };
+        function tryAddingAdvert() {
+            return spaceFiller.fillSpace(rules, insertAdAtPara);
+        }
+    };
 
     return {
         init: init,
