@@ -1,9 +1,10 @@
 package test
 
-import org.scalatest.{DoNotDiscover, Matchers, GivenWhenThen, FeatureSpec}
-import collection.JavaConversions._
-import org.fluentlenium.core.domain.FluentWebElement
 import conf.Configuration
+import org.fluentlenium.core.domain.FluentWebElement
+import org.scalatest.{DoNotDiscover, FeatureSpec, GivenWhenThen, Matchers}
+
+import scala.collection.JavaConversions._
 
 @DoNotDiscover class AnalyticsFeatureTest extends FeatureSpec with GivenWhenThen with Matchers with ConfiguredTestSuite {
   implicit val config = Configuration
@@ -48,9 +49,6 @@ import conf.Configuration
       }
 
     }
-
-    scenario("Ophan tracks user actions")(pending)
-
   }
 
   private def hasNoLinkName(e: FluentWebElement) = e.getAttribute("data-link-name") == null
