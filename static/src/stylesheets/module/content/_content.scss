@@ -670,6 +670,8 @@
     }
 }
 
+/* Paid content 2016 redesign */
+
 .paid-content--advertisement-feature {
     &.content--article,
     &.content--interactive,
@@ -689,10 +691,18 @@
         background-color: colour(paid-article-header);
     }
 
-    .tonal__standfirst {
+    .tonal__standfirst .content__standfirst {
+        color: colour(neutral-1);
+    }
+
+    .content__head .tonal__standfirst {
         background-color: colour(paid-article-subheader);
         padding: $gs-baseline 0 $gs-baseline*2;
         min-height: $gs-baseline*8;
+    }
+
+    .content__main .tonal__standfirst {
+        background: transparent;
     }
 
     .ad-slot__label,
@@ -735,13 +745,6 @@
         .meta__number {
             .inline-icon {
                 fill: colour(neutral-1);
-            }
-        }
-
-        &.content--media--audio,
-        &.content--media--video {
-            .tonal__standfirst {
-                display: none;
             }
         }
 

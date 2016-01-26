@@ -75,20 +75,41 @@
         </div>
     </div>
 
-    <div class="tonal__standfirst u-cf">
+    @hasStandfirstBadge = @{
+        showBadge && item.commercial.isAdvertisementFeature
+    }
+    @hasStandfirstText = @{
+        !item.tags.isVideo
+    }
+
+    @if(NewCommercialContent.isSwitchedOn) {
+        @if(item.fields.standfirst.isDefined && (hasStandfirstBadge || hasStandfirstText)) {
+            <div class="tonal__standfirst u-cf">
+                <div class="gs-container">
+                    <div class="content__main-column">
+                        @if(hasStandfirstBadge) {
+                            <div class="content__meta-container js-content-meta js-football-meta u-cf">
+                            @fragments.commercial.badge(item)
+                            </div>
+                        }
+                        @if(hasStandfirstText) {
+                            @fragments.standfirst(item)
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    } else {
+        <div class="tonal__standfirst u-cf">
         @if(item.fields.standfirst.isDefined) {
             <div class="gs-container">
                 <div class="content__main-column">
-                    @if(showBadge && NewCommercialContent.isSwitchedOn && item.commercial.isAdvertisementFeature) {
-                        <div class="content__meta-container js-content-meta js-football-meta u-cf">
-                            @fragments.commercial.badge(item)
-                        </div>
-                    }
-                    @if(!item.tags.isVideo) {
+                    @if(hasStandfirstText) {
                         @fragments.standfirst(item)
                     }
                 </div>
             </div>
         }
-    </div>
+        </div>
+    }
 </header>
