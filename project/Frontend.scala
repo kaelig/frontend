@@ -143,7 +143,8 @@ object Frontend extends Build with Prototypes {
       slf4jExt,
       exactTargetClient,
       nScalaTime,
-      dispatch
+      dispatch,
+      libPhoneNumber
     )
   )
 
